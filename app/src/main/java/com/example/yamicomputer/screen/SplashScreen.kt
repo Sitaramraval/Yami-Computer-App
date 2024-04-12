@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.yamicomputer.R
+import com.example.yamicomputer.logic.SharedViewModel
 import com.example.yamicomputer.navigation.Routes
-import com.example.yamicomputer.viewmodel.SharedViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -40,7 +40,7 @@ fun SplashScreen(
             modifier = Modifier
                 .height(150.dp)
                 .width(200.dp),
-            painter = painterResource(id = R.drawable.yamicard),
+            painter = painterResource(id = R.drawable.yamilogo),
             contentDescription = "welcome to yami computer",
             contentScale = ContentScale.Fit
         )

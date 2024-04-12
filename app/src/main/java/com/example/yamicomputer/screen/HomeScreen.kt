@@ -35,12 +35,13 @@ import androidx.navigation.NavController
 import com.example.yamicomputer.R
 import com.example.yamicomputer.data.ComplaintData
 import com.example.yamicomputer.data.ComplaintStatus
+import com.example.yamicomputer.data.ProductActions
 import com.example.yamicomputer.data.ProfileActions
 import com.example.yamicomputer.data.ProfileData
+import com.example.yamicomputer.logic.SharedViewModel
 import com.example.yamicomputer.navigation.Routes
 import com.example.yamicomputer.ui.theme.DarkBlue
 import com.example.yamicomputer.ui.theme.Purple80
-import com.example.yamicomputer.viewmodel.SharedViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -183,7 +184,7 @@ fun HomeScreen(
 
                     Row(modifier = Modifier.padding(20.dp)) {
 
-                        Text(text = "Total Complaints: ${complaintDataList.size}")
+                        Text(text = "Total Complaints: ${complaintDataList.filterNot { it.status == ComplaintStatus.COMPLETE.name || it.status == ComplaintStatus.OUTWARDS.name }.size}")
 
                     }
 
@@ -235,6 +236,7 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .clickable {
                             sharedViewModel.compliantStatus.value = ComplaintStatus.COMPLETE
+                            sharedViewModel.profileAction.value = ProfileActions.OUTWARD_COMPLAINT
                             navController.navigate(Routes.TotalComplaintScreen.id)
                         },
                     colors = CardDefaults.cardColors(containerColor = Purple80)
@@ -243,6 +245,47 @@ fun HomeScreen(
                     Row(modifier = Modifier.padding(20.dp)) {
 
                         Text(text = "Completed Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.COMPLETE.name }.size}")
+
+                    }
+
+                }
+
+                // outwards complaints
+                Card(
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            sharedViewModel.compliantStatus.value = ComplaintStatus.OUTWARDS
+                            sharedViewModel.profileAction.value = ProfileActions.OUTWARD_COMPLAINT
+                            navController.navigate(Routes.TotalComplaintScreen.id)
+                        },
+                    colors = CardDefaults.cardColors(containerColor = Purple80)
+                ) {
+
+                    Row(modifier = Modifier.padding(20.dp)) {
+
+                        Text(text = "Outwards Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.OUTWARDS.name }.size}")
+
+                    }
+
+                }
+
+                // outwards complaints
+                Card(
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            sharedViewModel.productAction.value = ProductActions.CREATE
+                            navController.navigate(Routes.AllProductsScreen.id)
+                        },
+                    colors = CardDefaults.cardColors(containerColor = Purple80)
+                ) {
+
+                    Row(modifier = Modifier.padding(20.dp)) {
+
+                        Text(text = "All Products: ${complaintDataList.filter { it.status == ComplaintStatus.OUTWARDS.name }.size}")
 
                     }
 

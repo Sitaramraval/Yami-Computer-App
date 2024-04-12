@@ -1,21 +1,25 @@
 package com.example.yamicomputer.navigation
 
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.yamicomputer.logic.SharedViewModel
 import com.example.yamicomputer.screen.AddComplaintScreen
+import com.example.yamicomputer.screen.AddProductScreen
+import com.example.yamicomputer.screen.AllProductsScreen
 import com.example.yamicomputer.screen.HomeScreen
 import com.example.yamicomputer.screen.LoginScreen
 import com.example.yamicomputer.screen.ProfileCreateScreen
 import com.example.yamicomputer.screen.SplashScreen
 import com.example.yamicomputer.screen.TotalComplaintScreen
-import com.example.yamicomputer.viewmodel.SharedViewModel
 
 @Composable
 fun NavGraph(
     navHostController: NavHostController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    componentActivity: ComponentActivity
 ) {
 
     NavHost(
@@ -42,12 +46,27 @@ fun NavGraph(
         composable(route = Routes.AddComplaintScreen.id) {
             AddComplaintScreen(
                 navController = navHostController,
-                sharedViewModel = sharedViewModel
+                sharedViewModel = sharedViewModel,
+                activity = componentActivity
             )
         }
 
         composable(route = Routes.TotalComplaintScreen.id) {
             TotalComplaintScreen(
+                navController = navHostController,
+                sharedViewModel = sharedViewModel
+            )
+        }
+
+        composable(route = Routes.AddProductScreen.id) {
+            AddProductScreen(
+                navController = navHostController,
+                sharedViewModel = sharedViewModel
+            )
+        }
+
+        composable(route = Routes.AllProductsScreen.id) {
+            AllProductsScreen(
                 navController = navHostController,
                 sharedViewModel = sharedViewModel
             )

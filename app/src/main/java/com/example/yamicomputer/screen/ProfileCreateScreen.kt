@@ -47,7 +47,7 @@ import com.example.yamicomputer.data.ProfileActions
 import com.example.yamicomputer.data.ProfileData
 import com.example.yamicomputer.navigation.Routes
 import com.example.yamicomputer.ui.theme.DarkBlue
-import com.example.yamicomputer.viewmodel.SharedViewModel
+import com.example.yamicomputer.logic.SharedViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
