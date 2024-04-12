@@ -78,7 +78,10 @@ import com.google.firebase.database.database
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
-
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -89,6 +92,9 @@ fun AddComplaintScreen(
 ) {
 
     val context = LocalContext.current
+
+    var selectedDate by remember { mutableStateOf<Date>(Calendar.getInstance().time) }
+    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     val smsPermissionState = rememberPermissionState(
         permission = Manifest.permission.SEND_SMS
@@ -504,7 +510,7 @@ fun AddComplaintScreen(
         )
     }
 
-    if (addComplaintClicked) {
+    if (addComplaintClicked && mobileNo.length == 10) {
         LaunchedEffect(key1 = Unit) {
             if (smsPermissionState.status.isGranted) {
 
@@ -553,7 +559,7 @@ fun AddComplaintScreen(
                                         smsManager.sendTextMessage(
                                             mobileNo,
                                             null,
-                                            "Hello $name, Welcome to YAMI Computers\nYour item: $item which had the problem: $problem is now in the ${complaintStatus.name} stage, we will update you if any changes happens in future",
+                                            "Hello ${complaintDataEdited.name}, Welcome to YAMI Computers\nYour item: ${complaintDataEdited.item} which had the problem: ${complaintDataEdited.problem} is now in the ${complaintDataEdited.status} stage, we will update you if any changes happens in future",
                                             null,
                                             null
                                         )
@@ -586,10 +592,84 @@ fun AddComplaintScreen(
 
                         })
                 }
+
+                if (selectedImageUri == null) {
+                    // on below line we are adding data.
+                    val complaintDataEdited = ComplaintData(
+                        name = name,
+                        date = date,
+                        item = item,
+                        problem = problem,
+                        charge = charge,
+                        photo = photo,
+                        status = complaintStatus.name,
+                        complaintId = newRef.key ?: "error while adding complaint!",
+                        mobileNo = mobileNo,
+                        collectorName = collectorName,
+                        collectionDate = collectionDate,
+                        dealerName = dealerName.name
+                    )
+
+                    newRef.setValue(complaintDataEdited)
+                    Log.d("error-firebase-database", "onCancelled:")
+
+                    databaseReference.addValueEventListener(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            // Data has changed
+                            Toast.makeText(
+                                context,
+                                "Complaint ${if (idNotEmpty) "Updated" else "Created"}!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            // on below line initializing sms manager.
+                            val smsManager: SmsManager =
+                                context.getSystemService(SmsManager::class.java)
+
+                            // sending the message
+                            if (mobileNo.isNotEmpty()) {
+                                smsManager.sendTextMessage(
+                                    mobileNo,
+                                    null,
+                                    "Hello ${complaintDataEdited.name}, Welcome to YAMI Computers\nYour item: ${complaintDataEdited.item} which had the problem: ${complaintDataEdited.problem} is now in the ${complaintDataEdited.status} stage, we will update you if any changes happens in future",
+                                    null,
+                                    null
+                                )
+                            }
+
+                            if (!idNotEmpty) {
+                                name = ""
+                                date = ""
+                                item = ""
+                                problem = ""
+                                charge = ""
+                                photo = ""
+                                selectedImageUri = null
+                                mobileNo = ""
+                            }
+
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // Error occurred
+                            Toast.makeText(
+                                context,
+                                "Fail to add data $error",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            Log.d("error-firebase-database", "onCancelled: $error")
+                        }
+                    })
+
+                    addComplaintClicked = false
+                }
             } else {
                 Toast.makeText(context, "SMS Permission not granted!", Toast.LENGTH_LONG).show()
             }
         }
+    } else if (addComplaintClicked) {
+        Toast.makeText(context, "Mobile Number Not Valid!", Toast.LENGTH_LONG).show()
     }
 
 }
