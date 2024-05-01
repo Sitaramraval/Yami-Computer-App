@@ -1,6 +1,7 @@
 package com.example.yamicomputer.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -38,19 +38,21 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.yamicomputer.data.ComplaintData
 import com.example.yamicomputer.data.ComplaintStatus
 import com.example.yamicomputer.data.ProfileActions
 import com.example.yamicomputer.logic.SharedViewModel
 import com.example.yamicomputer.navigation.Routes.AddComplaintScreen
 import com.example.yamicomputer.ui.theme.DarkBlue
+import com.example.yamicomputer.ui.theme.LightBlue
 import com.example.yamicomputer.ui.theme.Purple40
-import com.example.yamicomputer.ui.theme.Purple80
 import com.google.firebase.Firebase
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -219,43 +221,75 @@ fun ComplaintListUI(
     }
 
     Row {
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = search, onValueChange = { s ->
-                search = s
-            }, trailingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.Search, contentDescription = "search"
-                )
-            }
-        )
+//        TextField(
+//            modifier = Modifier.fillMaxWidth(),
+//            value = search, onValueChange = { s ->
+//                search = s
+//            }, trailingIcon = {
+//                Icon(
+//                    imageVector = Icons.Rounded.Search, contentDescription = "search"
+//                )
+//            }
+//        )
     }
 
     LazyColumn {
 
         items(list.reversed().filterComplaintStatus(complaintStatus)) {
+
+            var imageUri by remember {
+                mutableStateOf<String?>(null)
+            }
+
+            LaunchedEffect(key1 = Unit) {
+                imageUri = getImageUrlFromFirebaseStorage("images/${it.photo}")
+            }
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(15.dp),
-                colors = CardDefaults.cardColors(containerColor = Purple80),
-            ) {
-
-                Column(modifier = Modifier
                     .padding(15.dp)
                     .clickable {
                         sharedViewModel.id.value = it.complaintId
                         sharedViewModel.complaintData.value = it
                         sharedViewModel.profileAction.value = profileActions
                         navController.navigate(AddComplaintScreen.id)
-                    }) {
+                    },
+                colors = CardDefaults.cardColors(containerColor = LightBlue),
+            ) {
 
-                    Text(text = "Name: ${it.name}")
-                    Text(text = "Date: ${it.date}")
-                    Text(text = "Item: ${it.item}")
-                    Text(text = "Problem: ${it.problem}")
-                    Text(text = "Status: ${it.status}")
+                Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
+                    Column(
+                        modifier = Modifier
+                            .padding(15.dp)
+                            .fillMaxWidth(if (it.photo.isNotEmpty()) 0.6f else 1f)
+                    ) {
 
+                        Text(text = "Name: ${it.name}")
+                        Text(text = "Date: ${it.date}")
+                        Text(text = "Item: ${it.item}")
+                        Text(text = "Problem: ${it.problem}")
+                        Text(text = "Status: ${it.status}")
+
+                    }
+
+                    if (it.photo.isNotEmpty()) {
+                        imageUri?.let { uri ->
+                            val painter = rememberImagePainter(uri)
+                            Card(
+                                modifier = Modifier
+                                    .size(150.dp)
+                                    .padding(8.dp),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Image(
+                                    painter = painter,
+                                    contentDescription = "Selected Image",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.FillBounds
+                                )
+                            }
+                        }
+                    }
                 }
 
             }

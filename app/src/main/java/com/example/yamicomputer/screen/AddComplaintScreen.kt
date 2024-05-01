@@ -28,17 +28,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -79,7 +83,6 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -92,9 +95,6 @@ fun AddComplaintScreen(
 ) {
 
     val context = LocalContext.current
-
-    var selectedDate by remember { mutableStateOf<Date>(Calendar.getInstance().time) }
-    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     val smsPermissionState = rememberPermissionState(
         permission = Manifest.permission.SEND_SMS
@@ -207,6 +207,12 @@ fun AddComplaintScreen(
         mutableStateOf<Uri?>(null)
     }
 
+
+    var showDatePicker by remember {
+        mutableStateOf(false)
+    }
+
+
     // on below line creating variable for freebase database
     // and database reference.
 //    val firebaseDatabase = FirebaseDatabase.database
@@ -309,8 +315,20 @@ fun AddComplaintScreen(
                 value = date,
                 onTextChange = {
                     date = it
+                },
+                enable = false,
+                onClick = {
+                    showDatePicker = true
                 }
             )
+
+            if (showDatePicker) {
+                MyDatePickerDialog(
+                    onDateSelected = { date = it },
+                    onDismiss = { showDatePicker = false }
+                )
+            }
+
 
             // item
             RegularTextField(
@@ -816,4 +834,52 @@ suspend fun getImageUrlFromFirebaseStorage(imagePath: String): String? {
         e.printStackTrace()
         null
     }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MyDatePickerDialog(
+    onDateSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState(selectableDates = object : SelectableDates {
+        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+            return utcTimeMillis <= System.currentTimeMillis()
+        }
+    })
+
+    val selectedDate = datePickerState.selectedDateMillis?.let {
+        convertMillisToDate(it)
+    } ?: ""
+
+    DatePickerDialog(
+        onDismissRequest = { onDismiss() },
+        confirmButton = {
+            Button(onClick = {
+                onDateSelected(selectedDate)
+                onDismiss()
+            }
+
+            ) {
+                Text(text = "OK")
+            }
+        },
+        dismissButton = {
+            Button(onClick = {
+                onDismiss()
+            }) {
+                Text(text = "Cancel")
+            }
+        }
+    ) {
+        DatePicker(
+            state = datePickerState
+        )
+    }
+}
+
+private fun convertMillisToDate(millis: Long): String {
+    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return formatter.format(Date(millis))
 }

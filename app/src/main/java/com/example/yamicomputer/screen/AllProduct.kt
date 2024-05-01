@@ -2,16 +2,20 @@ package com.example.yamicomputer.screen
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
@@ -38,19 +42,21 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.yamicomputer.data.ProductActions
 import com.example.yamicomputer.data.ProductData
 import com.example.yamicomputer.data.ProductStatus
 import com.example.yamicomputer.logic.SharedViewModel
 import com.example.yamicomputer.navigation.Routes
 import com.example.yamicomputer.ui.theme.DarkBlue
+import com.example.yamicomputer.ui.theme.LightBlue
 import com.example.yamicomputer.ui.theme.Purple40
-import com.example.yamicomputer.ui.theme.Purple80
 import com.google.firebase.Firebase
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -144,39 +150,40 @@ fun AllProductsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
 
-                        IconButton(onClick = {
-                            navController.popBackStack()
-                        }) {
+                            IconButton(onClick = {
+                                navController.popBackStack()
+                            }) {
 
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = "back",
-                                tint = Color.White,
-                                modifier = Modifier.size(28.dp)
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                    contentDescription = "back",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(28.dp)
+                                )
+
+                            }
+                            Text(
+                                modifier = Modifier.padding(start = 15.dp),
+                                text = "All Products",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.White
                             )
 
                         }
-                        Text(
-                            modifier = Modifier.padding(start = 15.dp),
-                            text = "All Products",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White
-                        )
 
                     }
-
-                }
-            }, colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBlue))
+                }, colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBlue)
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -207,9 +214,11 @@ fun AllProductsScreen(
             Column {
                 Text(
                     text = "Sort By: ${selectedProductStatus.name}",
-                    modifier = Modifier.clickable {
-                        selectedProductStatusExpanded = true
-                    }.padding(top = 10.dp, start = 15.dp),
+                    modifier = Modifier
+                        .clickable {
+                            selectedProductStatusExpanded = true
+                        }
+                        .padding(top = 10.dp, start = 15.dp),
                     fontSize = 20.sp,
                     color = Color.Black
                 )
@@ -252,14 +261,18 @@ fun ProductListUI(
     LazyColumn {
 
         items(list.reversed().filterProductStatus(productStatus)) {
+
+            var imageUri by remember {
+                mutableStateOf<String?>(null)
+            }
+
+            LaunchedEffect(key1 = Unit) {
+                imageUri = getImageUrlFromFirebaseStorage("images/${it.photo}")
+            }
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(15.dp),
-                colors = CardDefaults.cardColors(containerColor = Purple80),
-            ) {
-
-                Column(modifier = Modifier
                     .padding(15.dp)
                     .clickable {
                         sharedViewModel.productID.value = it.productID
@@ -267,13 +280,48 @@ fun ProductListUI(
                         Log.d("product-data", it.toString())
                         sharedViewModel.productAction.value = ProductActions.UPDATE
                         navController.navigate(Routes.AddProductScreen.id)
-                    }) {
+                    },
+                colors = CardDefaults.cardColors(containerColor = LightBlue),
+            ) {
 
-                    Text(text = "Name: ${it.name}")
-                    Text(text = "Date: ${it.date}")
-                    Text(text = "Product: ${it.product}")
-                    Text(text = "Description: ${it.description}")
-                    Text(text = "Status: ${it.status}")
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    if (it.photo.isNotEmpty()) {
+                        imageUri?.let { uri ->
+                            val painter = rememberImagePainter(uri)
+                            Card(
+                                modifier = Modifier
+                                    .width(250.dp)
+                                    .height(170.dp)
+                                    .padding(8.dp),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Image(
+                                    painter = painter,
+                                    contentDescription = "Selected Image",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.FillBounds
+                                )
+                            }
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .padding(15.dp)
+                            .fillMaxWidth()
+                    ) {
+
+                        Text(text = "Name: ${it.name}")
+                        Text(text = "Date: ${it.date}")
+                        Text(text = "Product: ${it.product}")
+                        Text(text = "Description: ${it.description}")
+                        Text(text = "Status: ${it.status}")
+                    }
 
                 }
 

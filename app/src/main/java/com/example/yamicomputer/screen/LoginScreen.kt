@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.yamicomputer.R
 import com.example.yamicomputer.data.ProfileActions
-import com.example.yamicomputer.navigation.Routes
 import com.example.yamicomputer.logic.SharedViewModel
+import com.example.yamicomputer.navigation.Routes
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -104,7 +104,7 @@ fun LoginScreen(
             modifier = Modifier
                 .height(150.dp)
                 .width(200.dp),
-            painter = painterResource(id = R.drawable.yamicard),
+            painter = painterResource(id = R.drawable.yamilogo),
             contentDescription = "welcome to yami computer",
             contentScale = ContentScale.Fit
         )

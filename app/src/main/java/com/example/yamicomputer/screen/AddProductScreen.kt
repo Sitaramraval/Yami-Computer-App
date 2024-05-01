@@ -200,6 +200,11 @@ fun AddProductScreen(
     val database = Firebase.database
     val databaseReference = database.getReference("all-products")
 
+    var showDatePicker by remember {
+        mutableStateOf(false)
+    }
+
+
     val scrollState = rememberScrollState()
     Scaffold(
         topBar = {
@@ -286,8 +291,19 @@ fun AddProductScreen(
                 value = date,
                 onTextChange = {
                     date = it
+                },
+                enable = false,
+                onClick = {
+                    showDatePicker = true
                 }
             )
+
+            if (showDatePicker) {
+                MyDatePickerDialog(
+                    onDateSelected = { date = it },
+                    onDismiss = { showDatePicker = false }
+                )
+            }
 
             // item
             RegularTextField(

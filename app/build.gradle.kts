@@ -79,5 +79,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:1.4.0")
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
 
+    implementation("androidx.compose.material:material:1.6.5")
+
 
 }

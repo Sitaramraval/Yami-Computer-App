@@ -1,6 +1,5 @@
 package com.example.yamicomputer.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.yamicomputer.R
+import com.example.yamicomputer.data.ActivityCardData
+import com.example.yamicomputer.data.ActivityCardItems
 import com.example.yamicomputer.data.ComplaintData
 import com.example.yamicomputer.data.ComplaintStatus
 import com.example.yamicomputer.data.ProductActions
@@ -40,8 +39,18 @@ import com.example.yamicomputer.data.ProfileActions
 import com.example.yamicomputer.data.ProfileData
 import com.example.yamicomputer.logic.SharedViewModel
 import com.example.yamicomputer.navigation.Routes
+import com.example.yamicomputer.ui.theme.Dark
 import com.example.yamicomputer.ui.theme.DarkBlue
-import com.example.yamicomputer.ui.theme.Purple80
+import com.example.yamicomputer.ui.theme.DarkYellow
+import com.example.yamicomputer.ui.theme.Green
+import com.example.yamicomputer.ui.theme.Orange
+import com.example.yamicomputer.ui.theme.OrangeDark
+import com.example.yamicomputer.ui.theme.Pink40
+import com.example.yamicomputer.ui.theme.Pink80
+import com.example.yamicomputer.ui.theme.Salmon
+import com.example.yamicomputer.ui.theme.SalmonDark
+import com.example.yamicomputer.ui.theme.UIBlue
+import com.example.yamicomputer.ui.theme.Yellow
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -170,126 +179,250 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(top = 30.dp, start = 30.dp, end = 30.dp)
             ) {
-                // total complaints
-                Card(
+
+                // Buttons
+                Row(
                     modifier = Modifier
-                        .padding(vertical = 10.dp)
-                        .fillMaxWidth()
-                        .clickable {
+                        .padding(top = 20.dp, start = 10.dp, end = 10.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = 18.dp,
+                        alignment = Alignment.CenterHorizontally
+                    )
+                ) {
+                    // Total
+                    ActivityCardItems(
+                        activityCardData = ActivityCardData(
+                            text = "Total Complaints",
+                            icon = complaintDataList.filterNot { it.status == ComplaintStatus.COMPLETE.name || it.status == ComplaintStatus.OUTWARDS.name }.size,
+                            bgColor = Dark,
+                            cardColor = UIBlue,
+                            key = ""
+                        ),
+                        onClick = {
                             sharedViewModel.compliantStatus.value = ComplaintStatus.NOTHING
                             navController.navigate(Routes.TotalComplaintScreen.id)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Purple80)
-                ) {
-
-                    Row(modifier = Modifier.padding(20.dp)) {
-
-                        Text(text = "Total Complaints: ${complaintDataList.filterNot { it.status == ComplaintStatus.COMPLETE.name || it.status == ComplaintStatus.OUTWARDS.name }.size}")
-
-                    }
-
-                }
-                // pending complaints
-                Card(
-                    modifier = Modifier
-                        .padding(vertical = 10.dp)
-                        .fillMaxWidth()
-                        .clickable {
+                        }
+                    )
+                    // Pending
+                    ActivityCardItems(
+                        activityCardData = ActivityCardData(
+                            text = "Pending Complaints",
+                            icon = complaintDataList.filter { it.status == ComplaintStatus.PENDING.name }.size,
+                            bgColor = Dark,
+                            cardColor = Green,
+                            key = ""
+                        ),
+                        onClick = {
                             sharedViewModel.compliantStatus.value = ComplaintStatus.PENDING
                             navController.navigate(Routes.TotalComplaintScreen.id)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Purple80)
-                ) {
-
-                    Row(modifier = Modifier.padding(20.dp)) {
-
-                        Text(text = "Pending Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.PENDING.name }.size}")
-
-                    }
-
+                        }
+                    )
                 }
 
-                // ongoing complaints
-                Card(
+                // Buttons
+                Row(
                     modifier = Modifier
-                        .padding(vertical = 10.dp)
-                        .fillMaxWidth()
-                        .clickable {
+                        .padding(top = 20.dp, start = 10.dp, end = 10.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = 18.dp,
+                        alignment = Alignment.CenterHorizontally
+                    )
+                ) {
+                    // ONGOING
+                    ActivityCardItems(
+                        activityCardData = ActivityCardData(
+                            text = "Ongoing Complaints",
+                            icon = complaintDataList.filter { it.status == ComplaintStatus.ONGOING.name }.size,
+                            bgColor = SalmonDark,
+                            cardColor = Salmon,
+                            key = ""
+                        ),
+                        onClick = {
                             sharedViewModel.compliantStatus.value = ComplaintStatus.ONGOING
                             navController.navigate(Routes.TotalComplaintScreen.id)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Purple80)
-                ) {
-
-                    Row(modifier = Modifier.padding(20.dp)) {
-
-                        Text(text = "Ongoing Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.ONGOING.name }.size}")
-
-                    }
-
-                }
-
-                // complete complaints
-                Card(
-                    modifier = Modifier
-                        .padding(vertical = 10.dp)
-                        .fillMaxWidth()
-                        .clickable {
+                        }
+                    )
+                    // COMPLETE
+                    ActivityCardItems(
+                        activityCardData = ActivityCardData(
+                            text = "Complete Complaints",
+                            icon = complaintDataList.filter { it.status == ComplaintStatus.COMPLETE.name }.size,
+                            bgColor = DarkYellow,
+                            cardColor = Yellow,
+                            key = ""
+                        ),
+                        onClick = {
                             sharedViewModel.compliantStatus.value = ComplaintStatus.COMPLETE
                             sharedViewModel.profileAction.value = ProfileActions.OUTWARD_COMPLAINT
                             navController.navigate(Routes.TotalComplaintScreen.id)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Purple80)
-                ) {
-
-                    Row(modifier = Modifier.padding(20.dp)) {
-
-                        Text(text = "Completed Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.COMPLETE.name }.size}")
-
-                    }
-
+                        }
+                    )
                 }
 
-                // outwards complaints
-                Card(
+                // Buttons
+                Row(
                     modifier = Modifier
-                        .padding(vertical = 10.dp)
-                        .fillMaxWidth()
-                        .clickable {
+                        .padding(top = 20.dp, start = 10.dp, end = 10.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = 18.dp,
+                        alignment = Alignment.CenterHorizontally
+                    )
+                ) {
+                    // OUTWARDS
+                    ActivityCardItems(
+                        activityCardData = ActivityCardData(
+                            text = "Outwards Complaints",
+                            icon = complaintDataList.filter { it.status == ComplaintStatus.OUTWARDS.name }.size,
+                            bgColor = Pink40,
+                            cardColor = Pink80,
+                            key = ""
+                        ),
+                        onClick = {
                             sharedViewModel.compliantStatus.value = ComplaintStatus.OUTWARDS
                             sharedViewModel.profileAction.value = ProfileActions.OUTWARD_COMPLAINT
                             navController.navigate(Routes.TotalComplaintScreen.id)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Purple80)
-                ) {
-
-                    Row(modifier = Modifier.padding(20.dp)) {
-
-                        Text(text = "Outwards Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.OUTWARDS.name }.size}")
-
-                    }
-
-                }
-
-                // outwards complaints
-                Card(
-                    modifier = Modifier
-                        .padding(vertical = 10.dp)
-                        .fillMaxWidth()
-                        .clickable {
+                        }
+                    )
+                    // All Products
+                    ActivityCardItems(
+                        activityCardData = ActivityCardData(
+                            text = "All Products",
+                            icon = 0,
+                            bgColor = OrangeDark,
+                            cardColor = Orange,
+                            key = "",
+                        ),
+                        enableIcon = false,
+                        onClick = {
                             sharedViewModel.productAction.value = ProductActions.CREATE
                             navController.navigate(Routes.AllProductsScreen.id)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Purple80)
-                ) {
-
-                    Row(modifier = Modifier.padding(20.dp)) {
-
-                        Text(text = "All Products: ${complaintDataList.filter { it.status == ComplaintStatus.OUTWARDS.name }.size}")
-
-                    }
-
+                        }
+                    )
                 }
+
+//                // total complaints
+//                Card(
+//                    modifier = Modifier
+//                        .padding(vertical = 10.dp)
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            sharedViewModel.compliantStatus.value = ComplaintStatus.NOTHING
+//                            navController.navigate(Routes.TotalComplaintScreen.id)
+//                        },
+//                    colors = CardDefaults.cardColors(containerColor = Purple80)
+//                ) {
+//
+//                    Row(modifier = Modifier.padding(20.dp)) {
+//
+//                        Text(text = "Total Complaints: ${complaintDataList.filterNot { it.status == ComplaintStatus.COMPLETE.name || it.status == ComplaintStatus.OUTWARDS.name }.size}")
+//
+//                    }
+//
+//                }
+//                // pending complaints
+//                Card(
+//                    modifier = Modifier
+//                        .padding(vertical = 10.dp)
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            sharedViewModel.compliantStatus.value = ComplaintStatus.PENDING
+//                            navController.navigate(Routes.TotalComplaintScreen.id)
+//                        },
+//                    colors = CardDefaults.cardColors(containerColor = Purple80)
+//                ) {
+//
+//                    Row(modifier = Modifier.padding(20.dp)) {
+//
+//                        Text(text = "Pending Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.PENDING.name }.size}")
+//
+//                    }
+//
+//                }
+
+//                // ongoing complaints
+//                Card(
+//                    modifier = Modifier
+//                        .padding(vertical = 10.dp)
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            sharedViewModel.compliantStatus.value = ComplaintStatus.ONGOING
+//                            navController.navigate(Routes.TotalComplaintScreen.id)
+//                        },
+//                    colors = CardDefaults.cardColors(containerColor = Purple80)
+//                ) {
+//
+//                    Row(modifier = Modifier.padding(20.dp)) {
+//
+//                        Text(text = "Ongoing Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.ONGOING.name }.size}")
+//
+//                    }
+//
+//                }
+//
+//                // complete complaints
+//                Card(
+//                    modifier = Modifier
+//                        .padding(vertical = 10.dp)
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            sharedViewModel.compliantStatus.value = ComplaintStatus.COMPLETE
+//                            sharedViewModel.profileAction.value = ProfileActions.OUTWARD_COMPLAINT
+//                            navController.navigate(Routes.TotalComplaintScreen.id)
+//                        },
+//                    colors = CardDefaults.cardColors(containerColor = Purple80)
+//                ) {
+//
+//                    Row(modifier = Modifier.padding(20.dp)) {
+//
+//                        Text(text = "Completed Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.COMPLETE.name }.size}")
+//
+//                    }
+//
+//                }
+
+//                // outwards complaints
+//                Card(
+//                    modifier = Modifier
+//                        .padding(vertical = 10.dp)
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            sharedViewModel.compliantStatus.value = ComplaintStatus.OUTWARDS
+//                            sharedViewModel.profileAction.value = ProfileActions.OUTWARD_COMPLAINT
+//                            navController.navigate(Routes.TotalComplaintScreen.id)
+//                        },
+//                    colors = CardDefaults.cardColors(containerColor = Purple80)
+//                ) {
+//
+//                    Row(modifier = Modifier.padding(20.dp)) {
+//
+//                        Text(text = "Outwards Complaints: ${complaintDataList.filter { it.status == ComplaintStatus.OUTWARDS.name }.size}")
+//
+//                    }
+//
+//                }
+
+//                // All products
+//                Card(
+//                    modifier = Modifier
+//                        .padding(vertical = 10.dp)
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            sharedViewModel.productAction.value = ProductActions.CREATE
+//                            navController.navigate(Routes.AllProductsScreen.id)
+//                        },
+//                    colors = CardDefaults.cardColors(containerColor = Purple80)
+//                ) {
+//
+//                    Row(modifier = Modifier.padding(20.dp)) {
+//
+//                        Text(text = "All Products")
+//
+//                    }
+//
+//                }
             }
 
 
