@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
@@ -258,16 +258,24 @@ fun ProductListUI(
     productStatus: ProductStatus
 ) {
 
-    LazyColumn {
+    val scrollState = rememberScrollState()
 
-        items(list.reversed().filterProductStatus(productStatus)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+    ) {
+
+        list.reversed().filterProductStatus(productStatus).forEach {
 
             var imageUri by remember {
                 mutableStateOf<String?>(null)
             }
 
             LaunchedEffect(key1 = Unit) {
-                imageUri = getImageUrlFromFirebaseStorage("images/${it.photo}")
+                if (it.photo.isNotEmpty()) {
+                    imageUri = getImageUrlFromFirebaseStorage("images/${it.photo}")
+                }
             }
 
             Card(
@@ -328,8 +336,8 @@ fun ProductListUI(
             }
         }
     }
-
 }
+
 
 fun List<ProductData>.filterProductStatus(productStatus: ProductStatus): List<ProductData> {
 

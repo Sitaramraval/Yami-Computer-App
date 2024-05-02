@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
@@ -233,16 +233,24 @@ fun ComplaintListUI(
 //        )
     }
 
-    LazyColumn {
+    val scrollState = rememberScrollState()
 
-        items(list.reversed().filterComplaintStatus(complaintStatus)) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .verticalScroll(scrollState)) {
+
+
+        (list.reversed().filterComplaintStatus(complaintStatus)).forEach {
 
             var imageUri by remember {
                 mutableStateOf<String?>(null)
             }
 
             LaunchedEffect(key1 = Unit) {
-                imageUri = getImageUrlFromFirebaseStorage("images/${it.photo}")
+                if (it.photo.isNotEmpty()) {
+                    imageUri = getImageUrlFromFirebaseStorage("images/${it.photo}")
+                }
+
             }
             Card(
                 modifier = Modifier
@@ -257,7 +265,10 @@ fun ComplaintListUI(
                 colors = CardDefaults.cardColors(containerColor = LightBlue),
             ) {
 
-                Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Column(
                         modifier = Modifier
                             .padding(15.dp)
@@ -295,8 +306,8 @@ fun ComplaintListUI(
             }
         }
     }
-
 }
+
 
 fun List<ComplaintData>.filterComplaintStatus(complaintStatus: ComplaintStatus): List<ComplaintData> {
 
